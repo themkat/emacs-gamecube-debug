@@ -28,6 +28,10 @@
 (require 'dap-gdb-lldb)
 (require 'f)
 
+
+;; TODO: should we support broadband based network debugging? devkitpro seems to support it :O
+
+
 (defcustom gamecube-debug-gdb-path "powerpc-eabi-gdb"
   "Path to the DevkitPPC GDB executable (including executable)."
   :group 'gamecube-debug
@@ -59,7 +63,7 @@ Assumes elf-type. Unused if nil."
       (car filematches))))
 
 ;; TODO: should compiling be done automatically like for the GBA version?
-;; TODO: how to specify the target remote /dev-stuff?
+;; todo: symbol file? not readable when i tried... is that the reason i get the compilation unit error? dwarf error
 (defun gamecube-debug-program ()
   "Start a USB Gecko GDB debug session"
   (interactive)
@@ -70,7 +74,7 @@ Assumes elf-type. Unused if nil."
                      :type "gdbserver"
                      :request "attach"
                      :gdbpath gamecube-debug-gdb-path
-                     :target ":2345"
+                     :target "/dev/cu.usbserial-GECKUSB0"
                      :executable elf-file
                      :cwd project-directory))))
 
