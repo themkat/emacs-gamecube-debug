@@ -4,5 +4,23 @@ Debug Nintendo GameCube applications and games using USB Gecko right from the co
 
 Inspired by [my GBA debugging package](https://github.com/themkat/emacs-gba-debug) that does the same for GameBoy Advance, but using an emulator instead of USB Gecko.
 
+TODO: screenshot
 
 TODO: Instructions like in the GBA repo...
+
+** Possible issues
+
+*** "Reading symbols from /path/to/my.elf...Dwarf Error: wrong version in compilation unit header (is 5, should be 2, 3, or 4) [in module /path/to/my.elf]"
+This is caused by the newest versions of powerpc-eabi-gcc (version 12.1.0 from 2022 on my machine) defaulting to Dwarf-5 debug format, while powerpc-eabi-gdb (version 7.6.1 from 2013 on my machine) is not supporting it due to being an older version. [[https://dwarfstd.org/][Dwarf is a standard for debugging information, and is used by many different compilers today]].
+
+
+Why is the gdb version included with DevkitPPC an older version? This has to do with an unknown bug in newer versions than 7.7.1 causing errors and possible timeouts. No one has been able to find the solution it seems. You can read more about it in [[https://devkitpro.org/viewtopic.php?f=40&t=8735][this Devkitpro forum thread]].
+
+
+Then how do we solve it? Just compiling our application/game and telling the compiler to use Dwarf-4 (or 2 or 3)? Well, yes and no. The dependencies (like libogc) are also compiled with newer versions, causing them to also be Dwarf-5. It does not seem to be any easy way to change the Dwarf version once something is compiled. This means that we also have to compile our dependencies to use an older Dwarf header. Fortunately, this is simple as long as we have DevkitPPC installed. For [[https://github.com/devkitPro/libogc][libogc]], just add the following cflags to CFLAGS in the Makefile:
+
+#+BEGIN_SRC text
+  -gdwarf-4 -gstrict-dwarf
+#+END_SRC
+
+And then do the same for your application/game.
