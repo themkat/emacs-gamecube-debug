@@ -2,16 +2,55 @@
 Debug Nintendo GameCube applications and games using USB Gecko right from the comfort of Emacs! Powered by DevkitPro DevkitPPC gdb and dap-mode :) Probably works with Nintendo Wii as well, but I only use a GameCube so haven't tested it.
 
 
-Inspired by [my GBA debugging package](https://github.com/themkat/emacs-gba-debug) that does the same for GameBoy Advance, but using an emulator instead of USB Gecko.
+Inspired by [[https://github.com/themkat/emacs-gba-debug][my GBA debugging package]] that does the same for GameBoy Advance, but using an emulator instead of USB Gecko.
+
 
 TODO: screenshot
 
-TODO: Instructions like in the GBA repo...
+
+** Dependencies
+- a GameCube or Wii (duh!)
+- USB Gecko
+- DevkitPPC
+
+
+** Configuration
+To be able to use this package, you first need some minor configuration:
+- *gamecube-debug-gdb-path*: Set this variable to point to the location of the powerpc-eabi-gdb executable from DevkitPPC
+- *gamecube-debug-usbgecko-device*: This should point to the USB Gecko device file. On my Macbook Air this is /dev/cu.usbserial-GECKUSB0 (out of the box on my M1 with no extra driver installs!), while using a special driver on Windows it will be a COM device (e.g, COM5). [[https://wiibrew.org/wiki/USB_Gecko][WiiBrews wiki page on USB Gecko]] contains much useful information if you are uncertain about something :) (yes, the information is applicable for GameCube as well)
+
+
+*TODO: explain other possible configurations.*
+  
+  
+** Usage
+*NOTE: These instructions are based upon how I run applications on my GameCube. Your way of doing things may vary. I use Datel SD Media Launcher to run homebrew.*
+
+
+Remember to add the GDB debug stub and =_break();= instruction to your applications! This causes the application/game to wait for your GDB connection (and continue instruction) before starting.
+1. Add the debug.h header
+2. Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_USB,1);= (this just says that it should use USB Gecko on channel 1, which is Memory Card slot B. If you are unfamiliar with EXI channels, [[http://hitmen.c02.at/files/yagcd/yagcd/chap10.html][read this]])
+3. Add the =_break()= instruction somewhere (this is what causes the application to wait for you connecting, so put if before the instructions you want to debug)
+
+(You don't have to but =_break()= for each breakpoint! Once you have connected, you can set breakpoints like you are used to :) )
+
+
+
+Once you have configured the options above, there are really just a few steps you need to do:
+1. Build your project with debug symbols. You should have a elf file and a dol file after doing this.
+2. Transfer the dol file to an SD card or similar way to run homebrew. If you have a modded GameCube, you might be able to burn a mini DVD or similar instead.
+3. Run the dol file. Remember to have the USB Gecko connected to your GameCube and computer.
+4. Run the gamecube-debug-program operation in Emacs (M-x gamecube-debug-program). In most cases it should find the elf file automatically.
+5. Debug your application
+
+   
+If there is something unclear, or you need to debug issues with gdb debugging, [[https://wiibrew.org/wiki/Debugging][WiiBrew has a great guide on debugging using USB Gecko]].
+
 
 ** Possible issues
 
 *** "Reading symbols from /path/to/my.elf...Dwarf Error: wrong version in compilation unit header (is 5, should be 2, 3, or 4) [in module /path/to/my.elf]"
-This is caused by the newest versions of powerpc-eabi-gcc (version 12.1.0 from 2022 on my machine) defaulting to Dwarf-5 debug format, while powerpc-eabi-gdb (version 7.6.1 from 2013 on my machine) is not supporting it due to being an older version. [[https://dwarfstd.org/][Dwarf is a standard for debugging information, and is used by many different compilers today]].
+This is caused by the newest versions of powerpc-eabi-gcc (version 12.1.0 from 2022 on my machine) defaulting to Dwarf-5 debug format, while powerpc-eabi-gdb (version 7.6.2 from 2013 on my machine) is not supporting it due to being an older version. [[https://dwarfstd.org/][Dwarf is a standard for debugging information, and is used by many different compilers today]].
 
 
 Why is the gdb version included with DevkitPPC an older version? This has to do with an unknown bug in newer versions than 7.7.1 causing errors and possible timeouts. No one has been able to find the solution it seems. You can read more about it in [[https://devkitpro.org/viewtopic.php?f=40&t=8735][this Devkitpro forum thread]].
