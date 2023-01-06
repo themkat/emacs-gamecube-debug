@@ -20,7 +20,7 @@
 ;;; Commentary:
 
 ;; Simple utilities to make GameCube debugging more pleasant.
-;; Uses compile and dap-gdb-lldb for ease of use
+;; Uses dap-gdb-lldb for ease of use
 
 ;;; Code:
 
@@ -37,13 +37,13 @@
   :group 'gamecube-debug
   :type 'string)
 
-(defcustom gamecube-debug-build-command "make"
-  "Build command to use. make by default."
+(defcustom gamecube-debug-projectfile "Makefile"
+  "Project build file. Examples: Makefile, Cargo.toml etc."
   :group 'gamecube-debug
   :type 'string)
 
-(defcustom gamecube-debug-projectfile "Makefile"
-  "Project build file. Examples: Makefile, Cargo.toml etc."
+(defcustom gamecube-debug-usbgecko-device "/dev/cu.usbserial-GECKUSB0"
+  "Device used for USB Gecko access."
   :group 'gamecube-debug
   :type 'string)
 
@@ -62,8 +62,6 @@ Assumes elf-type. Unused if nil."
         (error (string-join (list "Could not find " type " file! Was compilation succesful?")))
       (car filematches))))
 
-;; TODO: should compiling be done automatically like for the GBA version?
-;; todo: symbol file? not readable when i tried... is that the reason i get the compilation unit error? dwarf error
 (defun gamecube-debug-program ()
   "Start a USB Gecko GDB debug session"
   (interactive)
@@ -74,7 +72,7 @@ Assumes elf-type. Unused if nil."
                      :type "gdbserver"
                      :request "attach"
                      :gdbpath gamecube-debug-gdb-path
-                     :target "/dev/cu.usbserial-GECKUSB0"
+                     :target gamecube-debug-usbgecko-device
                      :executable elf-file
                      :cwd project-directory))))
 
