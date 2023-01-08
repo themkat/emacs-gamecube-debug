@@ -29,9 +29,6 @@
 (require 'f)
 
 
-;; TODO: should we support broadband based network debugging? devkitpro seems to support it :O
-
-
 (defcustom gamecube-debug-gdb-path "powerpc-eabi-gdb"
   "Path to the DevkitPPC GDB executable (including executable)."
   :group 'gamecube-debug
@@ -46,6 +43,16 @@
   "Device used for USB Gecko access."
   :group 'gamecube-debug
   :type 'string)
+
+(defcustom gamecube-debug-network-connection-string "10.0.0.106:5555"
+  "Connection string (ip:port) for network debugging."
+  :group 'gamecube-debug
+  :type 'string)
+
+(defcustom gamecube-debug-network-debug nil
+  "Whether we should debug over TCP instead of using the USB Gecko."
+  :group 'gamecube-debug
+  :type 'boolean)
 
 ;; TODO: is some sort of custom executable path the best way to solve this?
 ;;       Does not feel like intricate logic to find the executable is worth it...
@@ -72,7 +79,7 @@ Assumes elf-type. Unused if nil."
                      :type "gdbserver"
                      :request "attach"
                      :gdbpath gamecube-debug-gdb-path
-                     :target gamecube-debug-usbgecko-device
+                     :target (if gamecube-debug-network-debug gamecube-debug-network-connection-string gamecube-debug-usbgecko-device)
                      :executable elf-file
                      :cwd project-directory))))
 
