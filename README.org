@@ -5,7 +5,10 @@ Debug Nintendo GameCube applications and games using USB Gecko right from the co
 Inspired by [[https://github.com/themkat/emacs-gba-debug][my GBA debugging package]] that does the same for GameBoy Advance, but using an emulator instead of USB Gecko.
 
 
-TODO: screenshot
+
+How the debugging might look using a USB Gecko with a M1 Macbook Air:
+[[./emacsdebug.png]]
+
 
 
 ** Dependencies
@@ -39,8 +42,6 @@ To use a USB Gecko for debugging, all you need to do is configure this variable:
 Remember to add the GDB debug stub and =_break();= instruction to your applications! This causes the application/game to wait for your GDB connection (and continue instruction) before starting.
 1. Add the debug.h header
 2. *USB Gecko:* Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_USB,1);= (this just says that it should use USB Gecko on channel 1, which is Memory Card slot B. If you are unfamiliar with EXI channels, [[http://hitmen.c02.at/files/yagcd/yagcd/chap10.html][read this]]).
-
-   
    *Network debug*: Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_TCP, 5555);= (second argument is the port. libogc provides a default 2828 with the constant =GDBSTUB_DEF_TCPPORT=). You also need to create a few variables (libogc has extern-definitions for them):
    #+BEGIN_SRC c
      const char *tcp_localip = "10.0.0.106";
