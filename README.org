@@ -10,26 +10,44 @@ TODO: screenshot
 
 ** Dependencies
 - a GameCube or Wii (duh!)
-- USB Gecko
-- DevkitPPC
+- USB Gecko or GameCube broadband adapter (probably works with Wii Ethernet solutions as well)
+- [[https://devkitpro.org/wiki/Getting_Started][DevkitPPC]] (gamecube-dev or wii-dev should install everything you need)
 
 
 ** Configuration
 To be able to use this package, you first need some minor configuration:
 - *gamecube-debug-gdb-path*: Set this variable to point to the location of the powerpc-eabi-gdb executable from DevkitPPC
+
+
+The rest of the configuration will depend if you debug using network debugging or use a USB Gecko.
+
+
+*** USB Gecko
+To use a USB Gecko for debugging, all you need to do is configure this variable:
 - *gamecube-debug-usbgecko-device*: This should point to the USB Gecko device file. On my Macbook Air this is /dev/cu.usbserial-GECKUSB0 (out of the box on my M1 with no extra driver installs!), while using a special driver on Windows it will be a COM device (e.g, COM5). [[https://wiibrew.org/wiki/USB_Gecko][WiiBrews wiki page on USB Gecko]] contains much useful information if you are uncertain about something :) (yes, the information is applicable for GameCube as well)
 
 
-*TODO: explain other possible configurations.*
-  
-  
+*** Network debugging (using broadband adapter)
+- *gamecube-debug-network-debug*: Set this variable to true (t) to use network debugging instead of USB Gecko.
+- *gamecube-debug-network-connection-string*: Set to the connection string (e.g, "10.0.0.106:5555") as the ip:port of your GameCube. Finding the IP can be a bit trial and error. For some of you it might be as simple as running =arp -na= and look at the various devices running on your network. The port is configured by you using the GDB stub from libogc in your code (second argument).
+   
+
 ** Usage
 *NOTE: These instructions are based upon how I run applications on my GameCube. Your way of doing things may vary. I use Datel SD Media Launcher to run homebrew.*
 
 
 Remember to add the GDB debug stub and =_break();= instruction to your applications! This causes the application/game to wait for your GDB connection (and continue instruction) before starting.
 1. Add the debug.h header
-2. Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_USB,1);= (this just says that it should use USB Gecko on channel 1, which is Memory Card slot B. If you are unfamiliar with EXI channels, [[http://hitmen.c02.at/files/yagcd/yagcd/chap10.html][read this]])
+2. *USB Gecko:* Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_USB,1);= (this just says that it should use USB Gecko on channel 1, which is Memory Card slot B. If you are unfamiliar with EXI channels, [[http://hitmen.c02.at/files/yagcd/yagcd/chap10.html][read this]]).
+
+   
+   *Network debug*: Add the debug stub =DEBUG_Init(GDBSTUB_DEVICE_TCP, 5555);= (second argument is the port. libogc provides a default 2828 with the constant =GDBSTUB_DEF_TCPPORT=). You also need to create a few variables (libogc has extern-definitions for them):
+   #+BEGIN_SRC c
+     const char *tcp_localip = "10.0.0.106";
+     const char *tcp_netmask = "255.255.255.0";
+     const char *tcp_gateway = "192.168.1.1";
+   #+END_SRC
+   (if you don't define these in your program, nothing will happen).
 3. Add the =_break()= instruction somewhere (this is what causes the application to wait for you connecting, so put if before the instructions you want to debug)
 
 (You don't have to but =_break()= for each breakpoint! Once you have connected, you can set breakpoints like you are used to :) )
@@ -39,7 +57,7 @@ Remember to add the GDB debug stub and =_break();= instruction to your applicati
 Once you have configured the options above, there are really just a few steps you need to do:
 1. Build your project with debug symbols. You should have a elf file and a dol file after doing this.
 2. Transfer the dol file to an SD card or similar way to run homebrew. If you have a modded GameCube, you might be able to burn a mini DVD or similar instead.
-3. Run the dol file. Remember to have the USB Gecko connected to your GameCube and computer.
+3. Run the dol file. Remember to have the USB Gecko connected to your GameCube and computer, or have the network details ready if you debug using the network.
 4. Run the gamecube-debug-program operation in Emacs (M-x gamecube-debug-program). In most cases it should find the elf file automatically.
 5. Debug your application
 
