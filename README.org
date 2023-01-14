@@ -13,6 +13,7 @@ How the debugging might look using a USB Gecko with a M1 Macbook Air:
 
 ** Dependencies
 - a GameCube or Wii (duh!)
+- a way to run homebrew on your GameCube or Wii
 - USB Gecko or GameCube broadband adapter (probably works with Wii Ethernet solutions as well)
 - [[https://devkitpro.org/wiki/Getting_Started][DevkitPPC]] (gamecube-dev or wii-dev should install everything you need)
 
