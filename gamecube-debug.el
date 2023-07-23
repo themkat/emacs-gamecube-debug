@@ -70,7 +70,7 @@ Assumes elf-type. Unused if nil."
       (car filematches))))
 
 (defun gamecube-debug-program ()
-  "Start a USB Gecko GDB debug session"
+  "Start a USB Gecko GDB debug session."
   (interactive)
   (let* ((project-directory (f-full (locate-dominating-file default-directory gamecube-debug-projectfile)))
          (elf-file (or gamecube-debug-custom-executable-path
